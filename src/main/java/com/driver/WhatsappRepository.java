@@ -13,7 +13,7 @@ public class WhatsappRepository {
 
     Map<Group, List<User>> groupUserList = new HashMap<>();
 
-    List<Message> messageDB = new ArrayList<>();
+    Map<Integer, Message> messageDB = new LinkedHashMap<>();
 
     Map<Group, List<Message>> groupMessages = new HashMap<>();
 
@@ -47,9 +47,10 @@ public class WhatsappRepository {
 
     public int createMessage(String content) {
 
-        Message message = new Message(++messageIndex, content, new Date());
-        messageDB.add(message);
-        return messageIndex;
+        int messageID = ++messageIndex;
+        Message message = new Message(messageID, content, new Date());
+        messageDB.put(messageID, message);
+        return messageID;
     }
 
     public int sendMessage(Message message, User sender, Group group) throws Exception {
@@ -132,7 +133,7 @@ public class WhatsappRepository {
             throw new Exception("User not found");
         }
         for(Message message : userMessagesList.get(user)) {
-            messageDB.remove(message);
+            messageDB.remove(message.getId());
             groupMessages.get(group).remove(message);
         }
         userMessagesList.remove(user);
@@ -144,7 +145,7 @@ public class WhatsappRepository {
     public String findMessage(Date start, Date end, int k) throws Exception {
 
         List<Message> messageList = new ArrayList<>();
-        for(Message message : messageDB) {
+        for(Message message : messageDB.values()) {
             if(message.getTimestamp().compareTo(start)>1 && message.getTimestamp().compareTo(end)<1) {
                 messageList.add(message);
             }
