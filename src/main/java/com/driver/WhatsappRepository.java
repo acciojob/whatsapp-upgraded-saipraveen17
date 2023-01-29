@@ -13,7 +13,7 @@ public class WhatsappRepository {
 
     Map<Group, List<User>> groupUserList = new HashMap<>();
 
-    Map<Integer, Message> messageDB = new HashMap<>();
+    List<Message> messageDB = new ArrayList<>();
 
     Map<Group, List<Message>> groupMessages = new HashMap<>();
 
@@ -47,10 +47,9 @@ public class WhatsappRepository {
 
     public int createMessage(String content) {
 
-        int messageID = ++messageIndex;
-        Message message = new Message(messageID, content, new Date());
-        messageDB.put(messageID, message);
-        return messageID;
+        Message message = new Message(++messageIndex, content, new Date());
+        messageDB.add(message);
+        return messageIndex;
     }
 
     public int sendMessage(Message message, User sender, Group group) throws Exception {
@@ -133,7 +132,7 @@ public class WhatsappRepository {
             throw new Exception("User not found");
         }
         for(Message message : userMessagesList.get(user)) {
-            messageDB.remove(message.getId());
+            messageDB.remove(message);
             groupMessages.get(group).remove(message);
         }
         userMessagesList.remove(user);
@@ -144,7 +143,15 @@ public class WhatsappRepository {
 
     public String findMessage(Date start, Date end, int k) throws Exception {
 
-
-        return "";
+        List<Message> messageList = new ArrayList<>();
+        for(Message message : messageDB) {
+            if(message.getTimestamp().compareTo(start)>1 && message.getTimestamp().compareTo(end)<1) {
+                messageList.add(message);
+            }
+        }
+        if(messageList.size()<k) {
+            throw new Exception("K is greater than the number of messages");
+        }
+        return messageList.get(messageList.size()-k).getContent();
     }
 }
